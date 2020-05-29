@@ -20,6 +20,47 @@
 from termcolor import colored
 import random
 
+class GameDB:
+    filename = ""
+    db = []
+    def __init__(self, dbfname):
+        self.filename = dbfname
+
+    def read_all_games(self):
+        with open(self.filename, "r") as f:
+            for line in f:
+                game_trace = list(map(int,line.split(", ")))
+                self.db.append(game_trace)
+
+    def store(self,game):
+        with open(self.filename, "a") as f:
+            f.write("\n")
+            f.write(str(game.moves)[1:][:-1])
+
+class GameEngine:
+    def __init__(self, dbfname):
+        pass
+
+    def learn_from(self,game):
+        pass
+
+    def definite_winning_move(self,state,player="x"):
+        """
+        If there exists a definite winning move, returns the position
+        Otherwise returns false
+        """
+        return False
+
+    def next_turn(self,game):
+        def_move = self.definite_winning_move(game.state)
+        if def_move:
+            return def_move
+        else:
+            rndmove = random.randint(0, len(game.state.available_moves)-1)
+            com_move = game.state.available_moves[rndmove]
+            print("Computer Taking move   :", com_move)
+            return com_move
+
 class State:
     """
     This class stores the current state of the board
@@ -33,6 +74,9 @@ class State:
     state_matrix = [["-"] * 3 for i in range(3)]
     #state_matrix = [["o","x","-"],["o","x","-"],["o","x","-"]]
     available_moves = list(range(1,10))
+
+    def __init__(self):
+        self.state_matrix = [["-"] * 3 for i in range(3)]
 
     def print_board_state(self, asking_for_move = False):
         possible_move = 0
@@ -86,9 +130,6 @@ class State:
         else:
             return False
 
-
-
-
     def reconstruct_available_moves(self):
         position = 0
         self.available_moves = []
@@ -98,12 +139,7 @@ class State:
                 if cell == "-":
                     self.available_moves.append(position)
 
-    def definite_winning_move(player="x"):
-        """
-        If there exists a definite winning move, returns the position
-        Otherwise returns false
-        """
-        return False
+
 
     def move_to_index(self,move):
         """
@@ -152,6 +188,10 @@ class TicTacToe:
     moves = []
     state = State()
 
+    def __init__(self):
+        self.moves = []
+        self.state = State()
+
     def whose_move(self):
         """
         Returns False if the the game has finished
@@ -181,19 +221,11 @@ class TicTacToe:
             return False
         return True
 
-    def take_random_move(self):
-        rndmove = random.randint(0, len(self.state.available_moves)-1)
-        com_move = self.state.available_moves[rndmove]
-        print("Computer Taking move   :", com_move)
+
+    def your_turn_computer(self,com_move):
         assert(self.valid_move(com_move))
         self.moves.append(com_move)
         self.state.set(com_move)
-
-    def your_turn_computer(self):
-        if self.state.definite_winning_move():
-            return self.state.definite_winning_move()
-        else:
-            self.take_random_move()
 
     def opponent_play_now(self):
         self.state.print_board_state(asking_for_move = True)
@@ -202,25 +234,40 @@ class TicTacToe:
         self.moves.append(-1*opp_move)
         self.state.set(-1*opp_move)
 
-def interactive_play(game):
+def interactive_play(game,player):
     while game.state.is_game_over() == False:
         if game.whose_move() == "x":
-            game.your_turn_computer()
+            move = player.next_turn(game)
+            game.your_turn_computer(move)
         else:
             if game.moves != []:
                 assert(game.whose_move() == "o")
             game.opponent_play_now()
     result = game.state.is_game_over()
     if result == "draw":
-        print("Game is Draw")
+        print(colored("Game is Draw","yellow"))
     elif result == "o":
-        print("You Won, Congratulations!")
+        print(colored("You Won, Congratulations!","green"))
     else:
         assert(result == "x")
-        print("Computer Won, Haha!")
+        print(colored("Computer Won, Haha!","red"))
     print("Final Board :")
     game.state.print_board_state()
 
+def games_in_loop(player,game_db):
+    while(True):
+        game = TicTacToe()
+        interactive_play(game,player)
+        game_db.store(game)
+        player.learn_from(game)
+        more = input("One more game [Y/n]?")
+        del game
+        if (more == "n"):
+            break
+
 if __name__ == "__main__":
-    game = TicTacToe()
-    interactive_play(game)
+    filename = "ttt_traces.txt"
+    game_db = GameDB(filename)
+    game_db.read_all_games()
+    player = GameEngine(game_db)
+    games_in_loop(player,game_db)
