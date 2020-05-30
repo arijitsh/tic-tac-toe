@@ -1,3 +1,4 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # tic-tac-toe
 Play the game of Tic-Tac-Toe against an intelligent machine.
 
@@ -16,7 +17,7 @@ sudo apt install git python3 python3-pip
 ```
 ## Game Engines
 
-Different algorithms has been implemented and possible to play against. Here are the
+Different algorithms has been implemented and possible to play against. Here are the details:
 
 `rl` : Reinforement Learning algorithm implemented from scratch.\
 `sampl` : Computer plays with random sampling.
@@ -26,10 +27,15 @@ Different algorithms has been implemented and possible to play against. Here are
 
 ## Features
 ### Equivalent Boards
-The following boards are same:
+The following boards are same, therefore one strategy should cover all these:
 ```
 ---   -x-  ---  ---
 --x   ---  x--  ---
 ---   ---  ---  -x-
 ```
 The computer can understand this. It calculates the equivalence classes of boards. See `board.py` for the implementation.
+
+## Code Organization
+`ttt.py` contains the main game playing.
+`game_engine.py` contains RL and other implementations.
+`state.py` maintains game states.
