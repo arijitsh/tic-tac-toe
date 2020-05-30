@@ -18,9 +18,9 @@
 # 02110-1301, USA.
 
 
-import random
 from utils import *
 from state import State
+from game_engine import GameEngine
 from termcolor import colored
 
 class GameDB:
@@ -37,32 +37,8 @@ class GameDB:
 
     def store(self,game):
         with open(self.filename, "a") as f:
-            f.write("\n")
             f.write(str(game.moves)[1:][:-1])
-
-class GameEngine:
-    def __init__(self, dbfname):
-        pass
-
-    def learn_from(self,game):
-        pass
-
-    def definite_winning_move(self,state,player="x"):
-        """
-        If there exists a definite winning move, returns the position
-        Otherwise returns false
-        """
-        return False
-
-    def next_turn(self,game):
-        def_move = self.definite_winning_move(game.state)
-        if def_move:
-            return def_move
-        else:
-            rndmove = random.randint(0, len(game.state.available_moves)-1)
-            com_move = game.state.available_moves[rndmove]
-            print("Computer Taking move   :", com_move)
-            return com_move
+            f.write("\n")
 
 class TicTacToe:
     """
@@ -155,7 +131,7 @@ def games_in_loop(player,game_db):
         game = TicTacToe()
         interactive_play(game,player)
         game_db.store(game)
-        player.learn_from(game)
+        player.learn_from(game.moves)
         more = input("One more game [Y/n]?")
         del game
         if (more == "n"):
@@ -166,5 +142,5 @@ if __name__ == "__main__":
     filename = "ttt_traces.txt"
     game_db = GameDB(filename)
     game_db.read_all_games()
-    player = GameEngine(game_db)
+    player = GameEngine(args,game_db.db)
     games_in_loop(player,game_db)
