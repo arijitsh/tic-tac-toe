@@ -19,6 +19,7 @@
 
 from termcolor import colored
 import random
+from utils import *
 
 class GameDB:
     filename = ""
@@ -77,6 +78,7 @@ class State:
 
     def __init__(self):
         self.state_matrix = [["-"] * 3 for i in range(3)]
+        available_moves = list(range(1,10))
 
     def print_board_state(self, asking_for_move = False):
         possible_move = 0
@@ -138,8 +140,6 @@ class State:
                 position += 1
                 if cell == "-":
                     self.available_moves.append(position)
-
-
 
     def move_to_index(self,move):
         """
@@ -266,6 +266,7 @@ def games_in_loop(player,game_db):
             break
 
 if __name__ == "__main__":
+    args = running_options()
     filename = "ttt_traces.txt"
     game_db = GameDB(filename)
     game_db.read_all_games()
