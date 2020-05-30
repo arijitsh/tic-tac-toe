@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL](https://img.shields.io/badge/License-GPL-yellow.svg)](https://opensource.org/licenses/GPL-2.0)
 # tic-tac-toe
 Play the game of Tic-Tac-Toe against an intelligent machine.
 
@@ -33,9 +33,9 @@ The following boards are same, therefore one strategy should cover all these:
 --x   ---  x--  ---
 ---   ---  ---  -x-
 ```
-The computer can understand this. It calculates the equivalence classes of boards. See `board.py` for the implementation.
+The player computer can understand this. It calculates the equivalence classes of boards. See `board.py` for the implementation.
 
 ## Code Organization
 `ttt.py` contains the main game playing.
 `game_engine.py` contains RL and other implementations.
-`state.py` maintains game states.
+`state.py` maintains game states and detects equivalences.
