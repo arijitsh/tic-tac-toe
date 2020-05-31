@@ -73,19 +73,12 @@ class TicTacToe:
         Returns False if the the game has finished
         Otherwise returns x or o depending on who should move now
         """
-        if self.state.is_game_over():
-            return False
-
+        if self.state.is_game_over():  return False
         if altered:
-            if (len(self.moves) % 2) :
-                return "O"
-            else:
-                return "X"
-
-        if (len(self.moves) % 2) :
-            return "X"
-        else:
-            return "O"
+            if (len(self.moves) % 2) : return "O"
+            else: return "X"
+        if (len(self.moves) % 2) : return "X"
+        else: return "O"
 
     def your_turn_computer(self,com_move):
         self.moves.append(com_move)
@@ -93,7 +86,8 @@ class TicTacToe:
 
     def opponent_play_now(self):
         self.state.print_board_state(asking_for_move = True)
-        message = 'Enter position to play. (You are '+ self.whose_move(altered = True) +') : '
+        message = 'Enter position to play. (You are '\
+                    + self.whose_move(altered = True) +') : '
         opp_move = int(input(message)) - 1
         self.moves.append(opp_move)
         self.state.set(opp_move)

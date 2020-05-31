@@ -28,12 +28,15 @@ class GameEngine:
     ql_table = np.zeros((0,0))  # Q-Learning scores are stored here
     traces = []
     args = ""
+    all_states = dict()
 
     def __init__(self, args, traces):
         state = State(args)
         state.list_all_eqv_classes()
-        self.num_states = len(state.map_hash_to_state)
+        self.all_states = state.all_states
+        self.num_states = len(list(state.all_states))
         self.ql_table = np.zeros((self.num_states,9))
+        print(np.shape(self.ql_table))
         self.traces = traces
         self.args = args
         if not args.no_train:
@@ -51,9 +54,10 @@ class GameEngine:
         update = score
         if self.args.verb:
             print("updating scores by", score ,"for (class,step)",seq)
-        for item in reversed(seq):
-            for step in item[1]:
-                self.ql_table[item[0],step] += update
+        print(seq)
+        for move_list in reversed(seq):
+            for move in move_list:
+                self.ql_table[self.all_states[move[0]],move[1]] += update
             update *= decay
 
     def learn_from(self,trace):
@@ -75,9 +79,9 @@ class GameEngine:
 
             if self.args.verb: print("hash",hash , "represents ",state.map_hash_to_state[hash])
             if is_p1_move:
-                seq_p1.append((hash, moves_list))
+                seq_p1.append(moves_list)
             else:
-                seq_p2.append((hash, moves_list))
+                seq_p2.append(moves_list)
             is_p1_move = not is_p1_move
         who_wins = state.is_game_over()
 
@@ -88,7 +92,7 @@ class GameEngine:
             self.update_sequence(seq_p2,-100)
 
         # p2 wins
-        if who_wins == 'O' and len(trace) % 2:
+        if who_wins == 'O':
             assert(len(trace) % 2 == 0)
             self.update_sequence(seq_p1,-100)
             self.update_sequence(seq_p2, 100)
@@ -103,8 +107,7 @@ class GameEngine:
     def next_turn(self,game):
         assert(len(game.state.available_moves))
         if self.args.rl:
-            eqv_cls = game.state.state_to_hash()
-            scores = self.ql_table[eqv_cls]
+            scores = self.ql_table[self.all_states[game.state.s]]
             if self.args.verb: print(game.state.available_moves)
             tuple_list = [(m, scores[m]) for m in game.state.available_moves]
             if self.args.verb: print(tuple_list)
@@ -113,7 +116,7 @@ class GameEngine:
 
             com_move = tuple_list[-1][0]
 
-            if self.args.verb: print("scores for eqv_cls",eqv_cls,scores)
+            # if self.args.verb: print("scores for eqv_cls",eqv_cls,scores)
             if self.args.verb: print("available_moves :", game.state.available_moves)
             if self.args.verb: print("Computer taking RL move   :", com_move+1)
 

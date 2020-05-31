@@ -101,6 +101,7 @@ class State:
     available_moves = list(range(9))
     map_state_to_hash = dict()
     map_hash_to_state = dict()
+    all_states = dict()
     last_state = ""
     args = ""
 
@@ -136,7 +137,6 @@ class State:
         if res == '/': return "draw"
         if res == '.': return False
         return res
-
 
     def reconstruct_available_moves(self):
         self.available_moves = []
@@ -175,6 +175,8 @@ class State:
                     # update map_hash_to_state
                     self.map_hash_to_state.update({hash:conj})
                 history.update(conj)
+        for i in range(len(list(history))):
+            self.all_states.update({list(history)[i]:i})
 
     def state_to_hash(self):
         self.last_state = self.s
@@ -213,7 +215,7 @@ class State:
             if string_diff(t[0],t[1]) == 0:
                 for it in range(9):
                     if t[0][it] != t[1][it]:
-                        if self.args.vverb: print("adding", it)
-                        valid_transitions.add(it)
+                        if self.args.vverb: print("adding", (t[0],it))
+                        valid_transitions.add((t[0],it))
         if self.args.verb: print("valid_transitions", valid_transitions)
         return list(valid_transitions)
