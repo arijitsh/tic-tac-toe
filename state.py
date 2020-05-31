@@ -71,6 +71,22 @@ def evalBoard(b):
     else:
         return '/'
 
+def string_diff(a,b):
+    assert(len(a) == len(b))
+    i = 0
+    for c in a:
+        if b[i] != c:
+            break
+        else:
+            i += 1
+    j = len(a) - 1
+    for it in reversed(a):
+        if b[j] != c:
+            break
+        else:
+            j -= 1
+    return j-i
+
 class State:
     """
     This class stores the current state of the board
@@ -181,7 +197,7 @@ class State:
         self.reconstruct_available_moves()
 
     def list_all_eqv_classes(self):
-        eqv_class_number = 0
+        eqv_class_number = -1
         history = set()
 
         for m in range(3**9):
@@ -212,9 +228,36 @@ class State:
         state_to_eqv_class(). therfore self.last_state has a proper element.
         """
         for item in self.map_eqv_class_to_state[eqv_class]:
-            diff = [li for li in difflib.ndiff(item,self.last_state) if li[0] != ' ']
-            if len(diff) == 2 :
+            if string_diff(item,self.last_state) == 0 :
                 for it in range(9):
                     if item[it] != self.last_state[it]:
                         return it+1
         assert(False)
+
+    def class_to_class_moves(self,cls1,cls2):
+        """
+        Lists all possible moves which results a transition
+        from class_1 to class_2
+            args:
+                cls1 : from equivalent class
+                cls2 : to equivalent class
+            return:
+                list of moves
+        """
+        state_from = self.map_eqv_class_to_state[cls1]
+        state_to = self.map_eqv_class_to_state[cls2]
+        all_transitions = itertools.product(state_from,state_to)
+        a = list(all_transitions)
+        print("possible_moves V :",list(a))
+        valid_transitions = set()
+        print(len(list(a)))
+        for t in a:
+            print("checking", t)
+            print("difference",string_diff(t[0],t[1]))
+            if string_diff(t[0],t[1]) == 0:
+                for it in range(9):
+                    if t[0][it] != t[1][it]:
+                        valid_transitions.add(it+1)
+                        print("adding", it+1)
+        print("valid_transitions", valid_transitions)
+        return list(valid_transitions)

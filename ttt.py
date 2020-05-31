@@ -130,6 +130,7 @@ def games_in_loop(player,game_db):
     while(True):
         game = TicTacToe()
         interactive_play(game,player)
+        player.learn_from(game.moves)
         game_db.store(game)
         player.learn_from(game.moves)
         more = input("One more game [Y/n]?")
@@ -139,7 +140,7 @@ def games_in_loop(player,game_db):
 
 if __name__ == "__main__":
     args = running_options()
-    filename = "ttt_traces.txt"
+    filename = "ttt_traces_debug.txt"
     game_db = GameDB(filename)
     game_db.read_all_games()
     player = GameEngine(args,game_db.db)
