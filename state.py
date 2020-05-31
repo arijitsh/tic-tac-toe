@@ -278,12 +278,9 @@ class State:
         a = list(all_transitions)
         valid_transitions = set()
         for t in a:
-            if self.args.vverb: print("checking", t)
-            if self.args.vverb: print("difference",string_diff(t[0],t[1]))
             if string_diff(t[0],t[1]) == 0:
                 for it in range(9):
                     if t[0][it] != t[1][it]:
-                        if self.args.vverb: print("adding", (t[0],it))
                         valid_transitions.add((t[0],it))
         if self.args.verb: print("valid_transitions", valid_transitions)
         return list(valid_transitions)

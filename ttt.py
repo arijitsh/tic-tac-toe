@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 
-
+import argparse
 from utils import *
 from state import State
 from termcolor import colored
@@ -189,6 +189,22 @@ def games_in_loop(player,game_db, args):
         del game
         if (more == "n"):
             break
+
+def running_options():
+	parser = \
+		argparse.ArgumentParser(description='A Simple Game of TicTacToe. \
+										Use options here to select strategy \
+										/ training type.'
+								)
+	parser.add_argument('-v', dest='verb', action='store_true',
+					help='Verbose printing while learning and selecting step')
+	parser.add_argument('--rl', dest='rl', action='store_true',
+					help='Use simple RL based player')
+	parser.add_argument('--no-train', dest='no_train', action='store_true',
+					help='Do not train with existing traces')
+	args = parser.parse_args()
+	return args
+
 
 if __name__ == "__main__":
     """

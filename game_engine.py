@@ -68,10 +68,16 @@ class GameEngine:
         end2 = time.time()
         print("c time taken in learning : %.2f sec"%(end2 - end))
 
-    def update_sequence(self,seq,score):
+    def update_sequence(self,seq,reward):
         """
         updates scores in Q-Learning table
+        Parameter for learning :
+            discount factor (d) : 0.8
+            learning rate   (l) : 0.8
+            reward          (r) : +100 / -100
         Formula :
+            Q(state,action) +=
+                l * ( r + d * max(Q(next_state,action)) - Q(state,action) )
 
         Parameters
         ----------
@@ -83,17 +89,24 @@ class GameEngine:
                           ---      -X-                       ---      ---
             The second move is found by anti-clockwise rotation of first board
         score : int
-            Value of reward (mostly polarity of reward matters)
+            Value of maximum reward (mostly polarity of reward matters)
         """
-        decay = 0.8
-        update = score
+        discount = 0.99
+        learning = 0.8
         if self.args.verb:
-            print("updating scores by", score ,"for (class,step)",seq)
+            print("updating scores by", reward ,"for (class,step)",seq)
             print(seq)
+        next_state_best = 0
         for move_list in reversed(seq):
             for move in move_list:
-                self.ql_table[self.all_states[move[0]],move[1]] += update
-            update *= decay
+                old_value = self.ql_table[self.all_states[move[0]],move[1]]
+                self.ql_table[self.all_states[move[0]],move[1]] += \
+                    learning * (reward + discount*next_state_best - old_value)
+                next_state_best = max(self.ql_table[self.all_states[move[0]]])
+                #if self.args.verb:
+                #    print("reward",reward,"old_value %.2f"%old_value)
+                #    print("new_value %.2f"\
+                #        %self.ql_table[self.all_states[move[0]],move[1]])
 
     def learn_from(self,trace):
         """
