@@ -20,8 +20,8 @@
 
 from utils import *
 from state import State
-from game_engine import GameEngine
 from termcolor import colored
+from game_engine import GameEngine
 
 class GameDB:
     filename = ""
@@ -32,12 +32,15 @@ class GameDB:
     def read_all_games(self):
         with open(self.filename, "r") as f:
             for line in f:
-                game_trace = list(map(int,line.split(", ")))
+                game_trace = list(map(int,line.split(" ")))
+                game_trace = [l-1 for l in game_trace]
                 self.db.append(game_trace)
 
     def store(self,game):
         with open(self.filename, "a") as f:
-            f.write(str(game.moves)[1:][:-1])
+            game_trace = [l+1 for l in game.moves]
+            moves_list = (str(game_trace)[1:][:-1]).replace(',','')
+            f.write(moves_list)
             f.write("\n")
 
 class TicTacToe:
@@ -58,77 +61,72 @@ class TicTacToe:
     """
 
     moves = []
-    state = State()
+    args = ""
+    state = State(args)
 
-    def __init__(self):
+    def __init__(self, args):
         self.moves = []
-        self.state = State()
+        self.state = State(args)
 
-    def whose_move(self):
+    def whose_move(self, altered = False):
         """
         Returns False if the the game has finished
         Otherwise returns x or o depending on who should move now
         """
         if self.state.is_game_over():
             return False
-        if self.moves == []:
-            start = input("Who should start? (x: computer o: you) ")
-            assert(start == "o" or start == "x")
-            return start
-        if (self.moves[-1] < 0):
-            return "x"
+
+        if altered:
+            if (len(self.moves) % 2) :
+                return "O"
+            else:
+                return "X"
+
+        if (len(self.moves) % 2) :
+            return "X"
         else:
-            assert(self.moves[-1] > 0)
-            return "o"
-
-    def valid_move(self, move):
-        if self.moves != []:
-            if (move*self.moves[-1] >= 0):
-                print("Last and this move are by same player.")
-                print("moves:", self.moves, " this move: ", move)
-                return False
-        p = self.state.move_to_index(move)
-        if self.state.state_matrix[p[0]][p[1]] != "-":
-            print("Position ", move, " already fixed")
-            return False
-        return True
-
+            return "O"
 
     def your_turn_computer(self,com_move):
-        assert(self.valid_move(com_move))
         self.moves.append(com_move)
         self.state.set(com_move)
 
     def opponent_play_now(self):
         self.state.print_board_state(asking_for_move = True)
-        opp_move = int(input('Enter position to play : '))
-        assert(self.valid_move(-1*opp_move))
-        self.moves.append(-1*opp_move)
-        self.state.set(-1*opp_move)
+        message = 'Enter position to play. (You are '+ self.whose_move(altered = True) +') : '
+        opp_move = int(input(message)) - 1
+        self.moves.append(opp_move)
+        self.state.set(opp_move)
 
 def interactive_play(game,player):
+    assert(game.moves == [])
+    human_move = False
+    human_start = input("Will you start? [Y/n] ")
+    if human_start != 'n' : human_move = True
+
     while game.state.is_game_over() == False:
-        if game.whose_move() == "x":
+        if not human_move:
             move = player.next_turn(game)
             game.your_turn_computer(move)
         else:
-            if game.moves != []:
-                assert(game.whose_move() == "o")
             game.opponent_play_now()
+        human_move = not human_move
+        game.state.reconstruct_available_moves()
+
     result = game.state.is_game_over()
+    print(result)
     if result == "draw":
         print(colored("Game is Draw","yellow"))
-    elif result == "o":
+    elif not human_move:
         print(colored("You Won, Congratulations!","green"))
     else:
-        assert(result == "x")
         print(colored("Computer Won, Haha!","red"))
     print("Final Board :")
     game.state.print_board_state()
 
-def games_in_loop(player,game_db):
+def games_in_loop(player,game_db, args):
     while(True):
-        game = TicTacToe()
+        game = TicTacToe(args)
         interactive_play(game,player)
         player.learn_from(game.moves)
         game_db.store(game)
@@ -140,8 +138,8 @@ def games_in_loop(player,game_db):
 
 if __name__ == "__main__":
     args = running_options()
-    filename = "ttt_traces_debug.txt"
+    filename = "ttt_traces.txt"
     game_db = GameDB(filename)
     game_db.read_all_games()
     player = GameEngine(args,game_db.db)
-    games_in_loop(player,game_db)
+    games_in_loop(player,game_db, args)

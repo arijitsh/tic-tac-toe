@@ -25,6 +25,10 @@ def running_options():
 										Use options here to select strategy \
 										/ training type.'
 								)
+	parser.add_argument('-v', dest='verb', action='store_true',
+					help='Verbose printing while learning and selecting step')
+	parser.add_argument('-vv', dest='vverb', action='store_true',
+					help='Too Verbose printing while learning and selecting step')
 	parser.add_argument('--sampling', dest='sampling', action='store_true',
 					help='Just random sampling player. No strategy.')
 	parser.add_argument('--mm', dest='mm', action='store_true',
@@ -33,7 +37,7 @@ def running_options():
 					help='Use simple RL based player')
 	parser.add_argument('--alphago', dest='alpha', action='store_true',
 					help='Use AlphaGo equivalent RL based player')
-	parser.add_argument('--no-train', dest='no-train', action='store_false',
+	parser.add_argument('--no-train', dest='no_train', action='store_true',
 					help='Do not train with existing traces')
 	args = parser.parse_args()
 	return args

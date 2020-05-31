@@ -40,7 +40,7 @@ The following boards are same, therefore one strategy should cover all these:
 The player computer can understand this. It calculates the equivalence classes of boards. Therefore the moves are from an equivalence class to another. See `board.py` for the implementation.
 
 ### Learning
-Computer learns about success and failure from a single trace.
+Computer learns about success and failure from a single trace. Strategy for both players.
 
 ## Code Organization
 `ttt.py` contains the main game playing.\

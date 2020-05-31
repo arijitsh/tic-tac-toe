@@ -30,14 +30,15 @@ class GameEngine:
     args = ""
 
     def __init__(self, args, traces):
-        state = State()
+        state = State(args)
         state.list_all_eqv_classes()
-        self.num_states = len(state.map_eqv_class_to_state)
+        self.num_states = len(state.map_hash_to_state)
         self.ql_table = np.zeros((self.num_states,9))
         self.traces = traces
         self.args = args
-        for trace in traces:
-            self.learn_from(trace)
+        if not args.no_train:
+            for trace in traces:
+                self.learn_from(trace)
 
     def update_sequence(self,seq,score):
         """
@@ -48,46 +49,47 @@ class GameEngine:
         """
         decay = 0.8
         update = score
-        print("updating scores by", score ,"for (class,step)",seq)
+        if self.args.verb:
+            print("updating scores by", score ,"for (class,step)",seq)
         for item in reversed(seq):
             for step in item[1]:
-                self.ql_table[item[0],step-1] += update
+                self.ql_table[item[0],step] += update
             update *= decay
 
     def learn_from(self,trace):
         seq_p1 = []
         seq_p2 = []
         is_p1_move = True
-        state = State()
+        state = State(self.args)
 
-        if trace[0] < 0 :
-            trace = [-t for t in trace]
-        print("Learning from trace : ", trace)
+        if self.args.verb: print("Learning from trace : ", trace)
 
         for step in trace:
-            eqv_class = state.state_to_eqv_class()
+            hash = state.state_to_hash()
             state.set(step)
-            next_eqv_class = state.state_to_eqv_class()
+            next_hash = state.state_to_hash()
 
-            print("current step :",step)
-            state.print_board_state()
-            moves_list = state.class_to_class_moves(eqv_class,next_eqv_class)
+            if self.args.verb: print("current step :",step)
+            if self.args.verb: state.print_board_state()
+            moves_list = state.class_to_class_moves(hash,next_hash)
 
-            print("eqv_class",eqv_class , "represents ",state.map_eqv_class_to_state[eqv_class])
+            if self.args.verb: print("hash",hash , "represents ",state.map_hash_to_state[hash])
             if is_p1_move:
-                seq_p1.append((eqv_class, moves_list))
+                seq_p1.append((hash, moves_list))
             else:
-                seq_p2.append((eqv_class, moves_list))
+                seq_p2.append((hash, moves_list))
             is_p1_move = not is_p1_move
         who_wins = state.is_game_over()
 
         # p1 wins
-        if (who_wins == 'x' and trace[0] > 0) or (who_wins == 'o' and trace[0] < 0):
+        if who_wins == 'X':
+            assert(len(trace) % 2 == 1)
             self.update_sequence(seq_p1, 100)
             self.update_sequence(seq_p2,-100)
 
         # p2 wins
-        if (who_wins == 'x' and trace[0] < 0) or (who_wins == 'o' and trace[0] > 0):
+        if who_wins == 'O' and len(trace) % 2:
+            assert(len(trace) % 2 == 0)
             self.update_sequence(seq_p1,-100)
             self.update_sequence(seq_p2, 100)
 
@@ -99,18 +101,22 @@ class GameEngine:
         return False
 
     def next_turn(self,game):
+        assert(len(game.state.available_moves))
         if self.args.rl:
-            eqv_cls = game.state.state_to_eqv_class()
+            eqv_cls = game.state.state_to_hash()
             scores = self.ql_table[eqv_cls]
-            tuple_list = [(m, scores[m-1]) for m in game.state.available_moves]
-            print(tuple_list)
+            if self.args.verb: print(game.state.available_moves)
+            tuple_list = [(m, scores[m]) for m in game.state.available_moves]
+            if self.args.verb: print(tuple_list)
             tuple_list.sort(key=lambda tup: tup[1])
-            print("sorted",tuple_list)
+            if self.args.verb: print("sorted",tuple_list)
 
             com_move = tuple_list[-1][0]
-            print("scores for eqv_cls",eqv_cls,scores)
-            print("available_moves :", game.state.available_moves)
-            print("Computer taking RL move   :", com_move)
+
+            if self.args.verb: print("scores for eqv_cls",eqv_cls,scores)
+            if self.args.verb: print("available_moves :", game.state.available_moves)
+            if self.args.verb: print("Computer taking RL move   :", com_move+1)
+
         else:
             def_move = self.definite_winning_move(game.state)
             if def_move:
