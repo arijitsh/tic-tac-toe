@@ -25,7 +25,7 @@ Rules are generally same as TicTacToe. Additionaly, here :
 Different algorithms has been implemented and possible to play against. Here are the details:
 
 - `rl` : Reinforement Learning algorithm (Q-learning) implemented from scratch. Look at `game_engine.py` for more details.
--`sampl` : Computer plays with random sampling.
+- `sampl` : Computer plays with random sampling.
 
 ### Options
 - `no-train` : Run from scratch, do not train with pre-existing traces.  
