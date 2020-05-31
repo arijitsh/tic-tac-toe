@@ -24,11 +24,11 @@ Rules are generally same as TicTacToe. Additionaly, here :
 
 Different algorithms has been implemented and possible to play against. Here are the details:
 
-`rl` : Reinforement Learning algorithm (Q-learning) implemented from scratch. For formulas and parameters, see `game_engine.py`.\
-`sampl` : Computer plays with random sampling.
+- `rl` : Reinforement Learning algorithm (Q-learning) implemented from scratch. Look at `game_engine.py` for more details.
+-`sampl` : Computer plays with random sampling.
 
 ### Options
-`no-train` : Run from scratch, do not train with pre-existing traces.  
+- `no-train` : Run from scratch, do not train with pre-existing traces.  
 
 ## Features
 ### Equivalent Boards
@@ -44,10 +44,10 @@ The player computer can understand this. It calculates the equivalence classes o
 Computer learns about success and failure from a single trace. Strategy for both players.
 
 ## Code Organization
-`ttt.py` contains the main game playing.\
-`state.py` maintains game states and detects equivalences.\
-`game_engine.py` contains RL and other implementations.\
-`ttt_traces.txt` contatins traces of already played games.
+- `ttt.py` contains the main game playing.
+- `state.py` maintains game states and detects equivalences.
+- `game_engine.py` contains RL and other implementations.
+- `ttt_traces.txt` contatins traces of already played games.
 
 ## Performance
 1. Perfroms better with higher learning rate and discount factors.

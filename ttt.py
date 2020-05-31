@@ -18,7 +18,6 @@
 # 02110-1301, USA.
 
 import argparse
-from utils import *
 from state import State
 from termcolor import colored
 from game_engine import GameEngine
