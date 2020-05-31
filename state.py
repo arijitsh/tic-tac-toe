@@ -21,6 +21,21 @@ import itertools
 from termcolor import colored
 from collections import Counter
 
+"""
+Following methods are used to create equivalent classes of states
+The basic idea is, many states are just rotation or reflection
+of some other state. Those should be considered same to learn faster
+
+There are (naively) 9^3 states possible for TicTacToe board
+On close inspection, we found there are only 765 equivalence classes
+
+We give each equivalence class a unique number and call it a "hash"
+
+according to our notation:
+    hash(state) = unique number of the class where the state belongs
+"""
+
+
 FLIP_XFRM = [2,1,0,5,4,3,8,7,6]
 ROT_XFRM = [6,3,0,7,4,1,8,5,2]
 
@@ -88,14 +103,55 @@ def string_diff(a,b):
     return j-i
 
 class State:
-    """
-    This class stores the current state of the board
+    """ A Class to store current state of TicTacToe board
+
     Board positions :
     1 | 2 | 3
     --|---|--
     4 | 5 | 6
     --|---|--
     7 | 8 | 9
+
+    Attibutes
+    ---------
+    s : str
+        state of the board now. s = '..X.O.XO.' represents (- means empty)
+         - | X | -
+        ---|---|---
+         - | O | -
+        ---|---|---
+         X | O | -
+    available_moves : list(int)
+        moves available to the next player
+    map_state_to_hash : dict(str:int)
+        hash for each state.
+        equivalent states are given a class
+        hash is the equivalence class of the state
+    map_state_to_hash : dict(int:list(str))
+        backward map for map_hash_to_state
+    all_states : dict(state:int)
+        all possible states to a unique number for enumeration
+    last_state : str
+        board state before a single move
+
+    Methods
+    -------
+    print_board_state(asking_for_move : bool,optional)
+        nicely prints TicTacToe board at its current state
+    is_game_over()
+        checks whether current state denotes a game that is already cover
+        if game is over, returns the result
+    reconstruct_available_moves()
+        reconstructs the list available_moves for current state
+    list_all_eqv_classes():
+        lists all equivalent classes
+    set(move : int)
+        Set board after a single move
+    state_to_hash()
+        for the state, returns its hash (as defined above)
+    class_to_class_moves(hash1 : int, hash2 : int)
+        Lists all possible moves which results a transition
+        from  a equivalent class to another
     """
     s = '.........'
     available_moves = list(range(9))
@@ -111,6 +167,9 @@ class State:
         self.args = args
 
     def print_board_state(self, asking_for_move = False):
+        """
+        nicely prints TicTacToe board at its current state
+        """
         for i in range(9) :
             if self.s[i] == ".":
                 if asking_for_move:
@@ -128,10 +187,11 @@ class State:
         """
         Checks a player has already won the game / match drawn
 
-        returns:
-            - False if game is not over
-            - "x"/"o" is "x" or "o" is winner
-            - "/" if match is drawn
+        Returns
+        -------
+            False   : if game is ongoing
+            "X"/"O" : if "X"/"O" has won
+            "draw"  : if match is drawn
         """
         res = evalBoard(self.s)
         if res == '/': return "draw"
@@ -139,6 +199,9 @@ class State:
         return res
 
     def reconstruct_available_moves(self):
+        """
+        reconstructs the list available_moves for current state
+        """
         self.available_moves = []
         for i in range(9):
             if self.s[i] == '.':
@@ -148,6 +211,11 @@ class State:
     def set(self, move):
         """
         Set board after a single move
+
+        Parameters
+        ----------
+        move : int
+            last move taken, which is to be reflected
         """
         assert(move >= 0 and move < 9)
         self.last_state = self.s
@@ -160,6 +228,9 @@ class State:
         self.reconstruct_available_moves()
 
     def list_all_eqv_classes(self):
+        """
+        lists all equivalent classes
+        """
         hash = -1
         history = set()
         for m in range(3**9):
@@ -179,30 +250,27 @@ class State:
             self.all_states.update({list(history)[i]:i})
 
     def state_to_hash(self):
+        """
+        for the state, returns its hash (as defined above)
+        """
         self.last_state = self.s
         return self.map_state_to_hash[self.s]
-
-    def eqv_class_to_move(self,hash):
-        """
-        Assumtion : this function has been called based on last call to
-        state_to_eqv_class(). therfore self.last_state has a proper element.
-        """
-        for item in self.map_hash_to_state[eqv_class]:
-            if string_diff(item,self.last_state) == 0 :
-                for it in range(9):
-                    if item[it] != self.last_state[it]:
-                        return it
-        assert(False)
 
     def class_to_class_moves(self,cls1,cls2):
         """
         Lists all possible moves which results a transition
-        from class_1 to class_2
-            args:
-                cls1 : from equivalent class
-                cls2 : to equivalent class
-            return:
-                list of moves
+        from  a equivalent class to another
+
+        Parameters
+        ----------
+            cls1 : int
+                from equivalent class
+            cls2 : int
+                to equivalent class
+        Returns
+        -------
+            valid_transitions : list((state:move))
+                list of state vs moves
         """
         state_from = self.map_hash_to_state[cls1]
         state_to = self.map_hash_to_state[cls2]

@@ -1,4 +1,4 @@
-# Methods to help TicTacToe
+# Methods to help TicTacToe. Contains the parsing options
 #
 # Copyright (C) 2020  Arijit Shaw
 #

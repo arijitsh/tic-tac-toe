@@ -24,7 +24,25 @@ from termcolor import colored
 from game_engine import GameEngine
 
 class GameDB:
-    filename = ""
+    """ A class for storing and reading games in a text file
+
+    A game is stored as a sequence of moves
+
+    Attibutes
+    ---------
+    filename : str
+        text file where to store the game / read from
+    db : list(list(int))
+        list of games, where game is a sequence (list) of moves (int)
+
+    Methods
+    -------
+    read_all_games()
+        read all games and store the traces of the games in list db
+    store(game)
+        store a recently played game's trace in the textfile
+    """
+
     db = []
     def __init__(self, dbfname):
         self.filename = dbfname
@@ -48,51 +66,81 @@ class TicTacToe:
     Class repersenting a (ongoing/finished) game of TicTacToe
     The game is stored as a sequence of moves taken till now
 
-    Board positions :
-    1 | 2 | 3
-    --|---|--
-    4 | 5 | 6
-    --|---|--
-    7 | 8 | 9
+    E.g., "4 5 9 3 1 6 7" means player 1 puts X at position 4, then
+                                player 2 puts O at position 5, then
+                                player 1 puts X at position 9, and so on
 
-    Moves :
-    +8 represents an X is put at position 8
-    -7 represents an O is put at position 7
+    Attibutes
+    ---------
+    move : list(int)
+        sequence of moves taken in current game
+    state : State object
+        stores current state of game, easily deducible from the sequence of moves
+
+    Methods
+    -------
+    whose_move(next : bool, optional)
+        returns who did last move
+        if next = True, returns whose move is next
+    your_turn_computer()
+        asks the player computer to make a move
+    opponent_play_now()
+        request human player to make a move
     """
-
-    moves = []
-    args = ""
-    state = State(args)
 
     def __init__(self, args):
         self.moves = []
         self.state = State(args)
 
-    def whose_move(self, altered = False):
+    def whose_move(self, next = False):
         """
-        Returns False if the the game has finished
-        Otherwise returns x or o depending on who should move now
+        Who made the last move / who will make the next move
+
+        Parameters
+        ----------
+        next : bool
+            False : who made last move
+            True  : who will make the next move
+
+        Returns
+        -------
+            False : if game is over
+            "O"/"X" : who made / going to make the last / next move
         """
         if self.state.is_game_over():  return False
-        if altered:
+        if next:
             if (len(self.moves) % 2) : return "O"
             else: return "X"
         if (len(self.moves) % 2) : return "X"
         else: return "O"
 
     def your_turn_computer(self,com_move):
+        """
+        Set a move made by computer
+
+        Parameters
+        ----------
+        com_mode : int
+            move chose by computer
+        """
         self.moves.append(com_move)
         self.state.set(com_move)
 
     def opponent_play_now(self):
+        """
+        Asks the human player for a move and sets the move
+        """
         self.state.print_board_state(asking_for_move = True)
         message = 'Enter position to play. (You are '\
-                    + self.whose_move(altered = True) +') : '
+                    + self.whose_move(next = True) +') : '
         opp_move = int(input(message)) - 1
         self.moves.append(opp_move)
         self.state.set(opp_move)
 
 def interactive_play(game,player):
+    """
+    An interactive game of TicTacToe between human and AI
+    """
     assert(game.moves == [])
     human_move = False
     human_start = input("Will you start? [Y/n] ")
@@ -119,6 +167,18 @@ def interactive_play(game,player):
     game.state.print_board_state()
 
 def games_in_loop(player,game_db, args):
+    """
+    Run interactive games in loop
+    Run a game, learn from it.
+    Loop until the human player gets bored
+
+    Parameters
+    ----------
+    player : GameEngine object
+        (possibly) trained game engine
+    game_db : GameDB object
+        to store the played games
+    """
     while(True):
         game = TicTacToe(args)
         interactive_play(game,player)
@@ -131,6 +191,11 @@ def games_in_loop(player,game_db, args):
             break
 
 if __name__ == "__main__":
+    """
+    Main function to run the game of TicTacToe
+    Reads all the stored games, trains the GameEngine (optionally)
+    Runs games in loop
+    """
     args = running_options()
     filename = "ttt_traces.txt"
     game_db = GameDB(filename)
